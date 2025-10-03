@@ -18,7 +18,6 @@ A **multi-rig monitoring stack** for Bitcoin solo mining with cpuminer-opt. This
 - [Usage](#usage)
 - [Monitoring](#monitoring)
 - [Troubleshooting](#troubleshooting)
-- [Advanced Configuration](#advanced-configuration)
 
 ---
 
@@ -381,36 +380,6 @@ docker compose restart dashboard
    ports:
      - "8080:8080"  # Use port 8080 instead
    ```
-
----
-
-## Advanced Configuration
-
-### Using a Different Mining Pool
-
-Edit `docker-compose.yml`:
-
-```yaml
--o stratum+tcp://your-pool.com:3333
--u YourUsername.WorkerName
--p YourPassword
-```
-
-### Adding Prometheus Metrics
-
-Extend `app.py` to expose `/metrics` endpoint for Prometheus scraping.
-
-### Email Alerts
-
-Install `smtplib` and add alert logic when miner goes offline:
-
-```python
-import smtplib
-
-def send_alert(miner_name):
-    # Send email notification
-    pass
-```
 
 ---
 
