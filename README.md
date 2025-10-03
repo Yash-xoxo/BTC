@@ -2,10 +2,6 @@
 
 A **multi-rig monitoring stack** for Bitcoin solo mining with cpuminer-opt. This project runs multiple CPU miners and a live dashboard to track hashrate, shares, uptime, and lottery odds.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Docker](https://img.shields.io/badge/docker-required-blue.svg)
-![Python](https://img.shields.io/badge/python-3.11-green.svg)
-
 ---
 
 ## 📖 Table of Contents
@@ -23,11 +19,6 @@ A **multi-rig monitoring stack** for Bitcoin solo mining with cpuminer-opt. This
 - [Monitoring](#monitoring)
 - [Troubleshooting](#troubleshooting)
 - [Advanced Configuration](#advanced-configuration)
-- [Security Considerations](#security-considerations)
-- [FAQ](#faq)
-- [Contributing](#contributing)
-- [License](#license)
-- [Disclaimer](#disclaimer)
 
 ---
 
@@ -423,106 +414,5 @@ def send_alert(miner_name):
 
 ---
 
-## Security Considerations
 
-⚠️ **Do NOT expose ports publicly** – Miners and dashboard should only be accessible on localhost or via VPN.
-
-- **Firewall Rules:** Block external access to ports 4048, 4049, 5000
-- **Use Reverse Proxy:** Deploy Nginx with SSL for secure remote access
-- **API Authentication:** Add basic auth to Flask endpoints if exposing remotely
-
-Example Nginx config:
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name mining.yourdomain.com;
-    
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-    
-    location / {
-        proxy_pass http://localhost:5000;
-        auth_basic "Restricted";
-        auth_basic_user_file /etc/nginx/.htpasswd;
-    }
-}
-```
-
----
-
-## FAQ
-
-**Q: Can I actually mine Bitcoin with this?**  
-A: Technically yes, but the odds of finding a block are astronomically low (~1 in billions). This is educational.
-
-**Q: How much Bitcoin will I earn?**  
-A: Realistically, **$0**. CPU mining Bitcoin is not profitable. ASIC miners dominate the network.
-
-**Q: Can I use GPU instead of CPU?**  
-A: cpuminer-opt is CPU-only. For GPU mining, use cgminer or similar (but still unprofitable for Bitcoin).
-
-**Q: Why solo mining?**  
-A: Pools distribute rewards based on contributed hashrate. Solo mining means you win the full block reward (6.25 BTC) if you find a block—but the odds are infinitesimal.
-
-**Q: Can I run this on a Raspberry Pi?**  
-A: Yes, but hashrate will be extremely low (~100 kH/s). Not recommended.
-
----
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License. See `LICENSE` file for details.
-
----
-
-## Disclaimer
-
-**⚠️ EDUCATIONAL USE ONLY**
-
-This software is provided for **educational and experimental purposes only**. Solo mining Bitcoin with CPU hardware has an **extremely low probability** of success and will **not generate meaningful income**.
-
-- **No warranties:** This software is provided "as is" without warranty of any kind.
-- **Electricity costs:** Mining consumes electricity. You will likely spend more on power than you earn.
-- **Hardware wear:** Continuous mining can shorten hardware lifespan.
-- **Use at your own risk:** The authors are not responsible for any losses, damages, or issues arising from use of this software.
-
-**By using this software, you acknowledge that:**
-- You understand the economics of Bitcoin mining
-- You are using this for learning/experimentation, not profit
-- You will not hold the authors liable for any outcomes
-
----
-
-## Acknowledgments
-
-- **cpuminer-opt** by [JayDDee](https://github.com/JayDDee/cpuminer-opt)
-- **solo.ckpool.org** by [Con Kolivas](https://github.com/ckolivas/ckpool)
-- **Flask** by the [Pallets Project](https://palletsprojects.com/)
-- **Docker** by [Docker Inc.](https://www.docker.com/)
-
----
-
-## Support
-
-For issues, questions, or feature requests:
-
-- **GitHub Issues:** [Open an issue](https://github.com/yourusername/bitcoin-lottery-miner/issues)
-- **Documentation:** Check the [Wiki](https://github.com/yourusername/bitcoin-lottery-miner/wiki)
-- **Community:** Join discussions in the [Discussions tab](https://github.com/yourusername/bitcoin-lottery-miner/discussions)
-
----
-
-**Happy Mining! ⛏️** (Even if it's just for fun and learning)
+**Happy Mining! ⛏️**
