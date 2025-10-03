@@ -42,7 +42,7 @@ Bitcoin Lottery Miner Dashboard is a containerized monitoring solution for solo 
 
 ## 🐳 Why Docker? 
 
-`docker run cniweb/cpuminer-opt:latest`
+`docker pull cniweb/cpuminer-opt:latest`
 
 - **Isolation** – Miners and dashboard run in separate containers, no pollution of your host system
 - **Portability** – Same configuration works on Linux, macOS, and Windows (with Docker Desktop)
