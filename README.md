@@ -70,8 +70,8 @@ The dashboard backend is written in **Python (Flask)** because:
                   │
                   ▼
 ┌─────────────────────────────────────────────┐
-│       Flask Dashboard (Gunicorn)            │
-│  - Polls miner APIs every 5 seconds         │
+│    Flask Dashboard (Gunicorn on :8080)      │
+│  - Polls miner APIs every few seconds       │
 │  - Calculates hashrate & lottery odds       │
 │  - Serves web UI + REST API                 │
 └──────────┬──────────────────────┬───────────┘
@@ -84,13 +84,15 @@ The dashboard backend is written in **Python (Flask)** because:
 └──────────────────┘   └──────────────────┘
 ```
 
+
 **How It Works:**
 
-1. **cpuminer-opt** instances run in separate Docker containers, mining against `solo.ckpool.org`
-2. Each miner exposes a JSON API via TCP socket (ports 4048, 4049)
-3. **Flask app** polls these sockets every 5 seconds, requesting `summary` stats
-4. **Dashboard** parses JSON (hashrate, shares, uptime) and displays live metrics
-5. **Gunicorn** serves Flask efficiently in production mode
+1. **Miners** (`cniweb/cpuminer-opt`) run SHA256d hashing against Bitcoin via `solo.ckpool.org`. Each miner exposes an API on TCP (ports 4048, 4049)
+2. **Dashboard backend** (`dashboard/app.py`) is a Flask app that opens a socket to each miner, requests `summary`, parses JSON, and stores samples in memory
+3. **Frontend** (`dashboard/templates/index.html`) is a styled HTML dashboard that polls `/api/miners` every few seconds and updates stats live
+4. **Dockerfile** builds a minimal Python + Flask image with Gunicorn
+5. **Docker Compose** spins up miners and dashboard together, wiring their networks automatically
+
 
 ---
 
@@ -105,21 +107,6 @@ BTC/
     ├─ Dockerfile          # Build instructions for dashboard image
     └─ templates/
         └─ index.html      # Frontend UI (HTML/CSS/JS)
-```
-
----
-
-### Installation Guides:
-
-- [Docker for Linux](https://docs.docker.com/engine/install/)
-- [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
-
-Verify installation:
-
-```bash
-docker --version
-docker compose version
 ```
 
 ---
@@ -164,59 +151,105 @@ This will:
 
 ### 4. Verify Containers Are Running
 
+Check they're running:
+
 ```bash
-docker compose ps
+docker ps
 ```
 
-Expected output:
+You should see:
+- `btc-miner1-1` (port 4048)
+- `btc-miner2-1` (port 4049)
+- `btc-dashboard-1` (port 5000 → 8080 inside)
+
+### 5. Check Logs
+
+**For miner logs:**
+
+```bash
+docker logs -f btc-miner1-1
+```
+
+Look for:
 
 ```
-NAME                IMAGE                    STATUS
-btc-miner1-1        minerstat/cpuminer-opt   Up 30 seconds
-btc-miner2-1        minerstat/cpuminer-opt   Up 30 seconds
-btc-dashboard-1     btc-dashboard            Up 30 seconds
+API listening to 0.0.0.0:4048
+accepted: 1/1 (100.00%), ...
+```
+
+**For dashboard logs:**
+
+```bash
+docker logs -f btc-dashboard-1
+```
+
+Look for:
+
+```
+[INFO] Listening at: http://0.0.0.0:8080
 ```
 
 ---
 
+
 ## Configuration
 
-### Adding More Miners
+## 📈 Scaling
 
-To add a third miner, edit `docker-compose.yml`:
+To add more miners:
+
+### 1. Add Miner to Docker Compose
+
+Copy one of the `miner` blocks in `docker-compose.yml` and modify:
 
 ```yaml
-services:
   miner3:
-    image: minerstat/cpuminer-opt:latest
+    image: cniweb/cpuminer-opt:latest
     container_name: miner3
-    command: >
-      cpuminer
-      -a sha256d
-      -o stratum+tcp://solo.ckpool.org:3333
-      -u bc1YourRealBTCWalletAddress.LotteryMiner3
-      --api-bind 0.0.0.0:4050
-      -t 2
+    command:
+      - "cpuminer"
+      - "-a"
+      - "sha256d"
+      - "-o"
+      - "stratum+tcp://solo.ckpool.org:3333"
+      - "-u"
+      - "bc1YourRealBTCWallet.LotteryMiner3"  # Change worker name
+      - "-p"
+      - "x"
+      - "-t"
+      - "4"
+      - "--api-bind=0.0.0.0:4050"  # New port
     ports:
-      - "4050:4050"
+      - "4050:4050"  # Map new port
     restart: unless-stopped
 ```
 
-Update `dashboard/app.py` to include the new miner:
+### 2. Update Dashboard Configuration
 
-```python
-MINERS = [
-    {"name": "Miner 1", "host": "miner1", "port": 4048},
-    {"name": "Miner 2", "host": "miner2", "port": 4049},
-    {"name": "Miner 3", "host": "miner3", "port": 4050},  # Add this
-]
+Add the new miner to the `MINERS` environment variable in the `dashboard` service:
+
+```yaml
+dashboard:
+  build: ./dashboard
+  ports:
+    - "5000:8080"
+  environment:
+    - MINERS=miner1:4048,miner2:4049,miner3:4050  # Add miner3
+  depends_on:
+    - miner1
+    - miner2
+    - miner3  # Add dependency
 ```
 
-Rebuild and restart:
+### 3. Rebuild and Restart
 
 ```bash
 docker compose down
 docker compose up -d --build
+```
+
+The new miner will automatically appear on the dashboard!
+
 ```
 
 ### Adjusting CPU Threads
@@ -286,6 +319,27 @@ Example response:
 
 ## Monitoring
 
+### Start Everything
+
+```bash
+docker compose up -d --build
+```
+
+### Stop Everything
+
+```bash
+docker compose down
+```
+
+### Restart Just Dashboard
+
+After making code changes:
+
+```bash
+docker compose build dashboard
+docker compose up -d dashboard
+```
+
 ### View Logs
 
 **Dashboard logs:**
@@ -301,12 +355,17 @@ docker logs -f btc-miner1-1
 docker logs -f btc-miner2-1
 ```
 
-### Test Miner API Directly
+### Debug Miner API Directly
 
 Use `netcat` to query a miner:
 
 ```bash
-echo '{"command":"summary"}' | nc localhost 4048
+nc localhost 4048
+```
+
+Then type:
+```
+summary
 ```
 
 Expected response (JSON):
