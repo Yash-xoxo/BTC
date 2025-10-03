@@ -12,7 +12,6 @@ A **multi-rig monitoring stack** for Bitcoin solo mining with cpuminer-opt. This
 - [Why Python?](#-why-python)
 - [Architecture](#architecture)
 - [Project Structure](#-project-structure)
-- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
@@ -110,14 +109,6 @@ BTC/
 
 ---
 
-## Prerequisites
-
-- **Docker** (v20.10+) and **Docker Compose** (v2.0+)
-- **2+ CPU cores** (more cores = higher hashrate)
-- **Valid Bitcoin wallet address** (starts with `bc1...` for SegWit)
-- **Stable internet connection**
-- **Linux/macOS/Windows** with Docker Desktop
-
 ### Installation Guides:
 
 - [Docker for Linux](https://docs.docker.com/engine/install/)
@@ -138,8 +129,8 @@ docker compose version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/bitcoin-lottery-miner.git
-cd bitcoin-lottery-miner
+git clone https://github.com/Yash-xoxo/BTC.git
+cd BTC
 ```
 
 Or manually create the project structure as shown in [Project Structure](#-project-structure).
