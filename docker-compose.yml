@@ -1,0 +1,51 @@
+services:
+  miner1:
+    image: cniweb/cpuminer-opt:latest
+    command:
+      - "cpuminer"
+      - "-a"
+      - "sha256d"
+      - "-o"
+      - "stratum+tcp://solo.ckpool.org:3333"
+      - "-u"
+      - "bc1YOUR_REAL_BTC_WALLET_ADDRESS.LotteryMiner1"
+      - "-p"
+      - "x"
+      - "-t"
+      - "4"
+      - "--api-bind=0.0.0.0:4048"
+    ports:
+      - "4048:4048"
+
+  miner2:
+    image: cniweb/cpuminer-opt:latest
+    command:
+      - "cpuminer"
+      - "-a"
+      - "sha256d"
+      - "-o"
+      - "stratum+tcp://solo.ckpool.org:3333"
+      - "-u"
+      - "bc1YOUR_REAL_BTC_WALLET_ADDRESS.LotteryMiner2"
+      - "-p"
+      - "x"
+      - "-t"
+      - "4"
+      - "--api-bind=0.0.0.0:4049"
+    ports:
+      - "4049:4049"
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - FLASK_ENV=production
+      - MINERS=miner1:4048,miner2:4049
+      - POLL_INTERVAL=5
+      - HISTORY_SAMPLES=120
+    depends_on:
+      - miner1
+      - miner2
