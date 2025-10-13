@@ -1,431 +1,466 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Lottery Miner Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { 
-      font-family: Inter, Arial, sans-serif; 
-      background:#0b1020; 
-      color:#e6f7ff; 
-      margin:0; 
-      padding:20px;
-      background-image: linear-gradient(to bottom right, #0b1020, #131b3b);
-    }
-    header { 
-      display:flex; 
-      align-items:center; 
-      justify-content:space-between; 
-      margin-bottom:16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .grid { 
-      display:grid; 
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-      gap:12px;
-    }
-    .card { 
-      background: rgba(255,255,255,0.03); 
-      border:1px solid rgba(255,255,255,0.04); 
-      padding:16px; 
-      border-radius:8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,0.08);
-    }
-    .title { 
-      font-weight:700; 
-      margin-bottom:6px; 
-      font-size:16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .title-icon {
-      font-size: 18px;
-    }
-    .muted { 
-      color:#9fb3c8; 
-      font-size:12px;
-    }
-    .value { 
-      font-size:20px; 
-      font-weight:700; 
-      margin-top:6px;
-      text-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-    }
-    .offline { 
-      color:#ff6b6b; 
-      font-weight:700;
-    }
-    .online { 
-      color:#57f287; 
-      font-weight:700;
-    }
-    .chart { 
-      width:100%; 
-      height:120px; 
-      margin-top: 12px;
-    }
-    footer { 
-      margin-top:20px; 
-      font-size:12px; 
-      color:#9fb3c8;
-      text-align: center;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .stats-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 16px;
-      padding: 12px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 6px;
-    }
-    .stat-item {
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .stat-label {
-      font-size: 10px;
-      color: #9fb3c8;
-    }
-    .hashrate-trend {
-      font-size: 12px;
-      margin-left: 8px;
-    }
-    .up {
-      color: #57f287;
-    }
-    .down {
-      color: #ff6b6b;
-    }
-    .pool-info {
-      margin-top: 8px;
-      font-size: 11px;
-      color: #9fb3c8;
-    }
-    .refresh-indicator {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #57f287;
-      margin-right: 5px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTX 2050 Miner Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0b1020 0%, #1a1f38 100%);
+            color: #e6f7ff;
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-info {
+            font-size: 12px;
+            color: #9fb3c8;
+        }
+        
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #9fb3c8;
+        }
+        
+        .miners-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .miner-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .miner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .miner-title {
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        
+        .online {
+            background: rgba(87, 242, 135, 0.2);
+            color: #57f287;
+        }
+        
+        .offline {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+        
+        .miner-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .miner-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            padding: 8px;
+        }
+        
+        .miner-stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .miner-stat-label {
+            font-size: 10px;
+            color: #9fb3c8;
+        }
+        
+        .chart-container {
+            height: 80px;
+            margin-top: 8px;
+        }
+        
+        footer {
+            margin-top: auto;
+            text-align: center;
+            font-size: 11px;
+            color: #9fb3c8;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #57f287;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .temp-indicator {
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
+        .cool { color: #57f287; }
+        .warm { color: #ffa726; }
+        .hot { color: #ff6b6b; }
+        
+        .trend {
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
+        .up { color: #57f287; }
+        .down { color: #ff6b6b; }
+    </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>⛏ Lottery Miner Dashboard</h1>
-      <div class="muted">Multi-rig health & short-term trends</div>
-    </div>
-    <div class="muted"><span class="refresh-indicator"></span>Auto-refresh via websocket-style polling</div>
-  </header>
-
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-value">6.42 GH/s</div>
-      <div class="stat-label">Total Hashrate</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">4/5</div>
-      <div class="stat-label">Active Rigs</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">98.2%</div>
-      <div class="stat-label">Uptime</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">0.0042 BTC</div>
-      <div class="stat-label">24h Revenue</div>
-    </div>
-  </div>
-
-  <main id="main">
-    <div class="grid" id="grid">
-      <!-- cards will be injected -->
-    </div>
-  </main>
-
-  <footer>
-    Last update: <span id="ts">--</span> · Poll interval: 5s
-  </footer>
-
-<script>
-// Mock data for miners
-const miners = ['Rig-001', 'Rig-002', 'Rig-003', 'Rig-004', 'Rig-005'];
-const charts = {};
-const minerIcons = ['⛏', '⚒', '⛏', '⚒', '⛏'];
-const pools = ['eu1.ethermine.org:4444', 'us1.ethermine.org:4444', 'asia1.ethermine.org:4444'];
-
-// Generate initial data for each miner
-function generateInitialData(id) {
-  const baseHashrate = Math.random() * 2 + 0.5; // Between 0.5 and 2.5 GH/s
-  const status = Math.random() > 0.2; // 80% chance of being online
-  
-  const history = [];
-  const now = Math.floor(Date.now() / 1000);
-  
-  for (let i = 10; i >= 0; i--) {
-    const timeOffset = i * 30; // 30-second intervals
-    const hashrate = baseHashrate * 1e9 * (1 + (Math.random() * 0.4 - 0.2)); // ±20% variation
-    history.push({
-      ts: now - timeOffset,
-      hashrate_hs: hashrate
-    });
-  }
-  
-  const accepted = Math.floor(Math.random() * 1000) + 100;
-  const rejected = Math.floor(Math.random() * 20);
-  
-  return {
-    status: { online: status },
-    latest: {
-      hashrate_hs: baseHashrate * 1e9,
-      accepted: accepted,
-      rejected: rejected
-    },
-    history: history,
-    pool: pools[Math.floor(Math.random() * pools.length)]
-  };
-}
-
-// Update data for each miner with small random variations
-function updateMinerData(data) {
-  for (const id in data) {
-    const miner = data[id];
-    
-    // 5% chance to change status
-    if (Math.random() < 0.05) {
-      miner.status.online = !miner.status.online;
-    }
-    
-    if (miner.status.online) {
-      // Update hashrate with small variation
-      const variation = (Math.random() * 0.2 - 0.1); // ±10%
-      miner.latest.hashrate_hs = miner.latest.hashrate_hs * (1 + variation);
-      
-      // Add new data point to history
-      const now = Math.floor(Date.now() / 1000);
-      miner.history.push({
-        ts: now,
-        hashrate_hs: miner.latest.hashrate_hs
-      });
-      
-      // Keep only last 10 data points
-      if (miner.history.length > 10) {
-        miner.history.shift();
-      }
-      
-      // Occasionally add shares
-      if (Math.random() < 0.3) {
-        miner.latest.accepted += Math.floor(Math.random() * 5);
-      }
-      if (Math.random() < 0.05) {
-        miner.latest.rejected += 1;
-      }
-    }
-  }
-  
-  return data;
-}
-
-// Initialize data
-let minerData = {};
-miners.forEach((miner, index) => {
-  minerData[miner] = generateInitialData(miner);
-});
-
-function humanHash(h){
-  if(!h) return "0 H/s";
-  if(h>1e9) return (h/1e9).toFixed(2)+" GH/s";
-  if(h>1e6) return (h/1e6).toFixed(2)+" MH/s";
-  if(h>1e3) return (h/1e3).toFixed(2)+" KH/s";
-  return h.toFixed(2)+" H/s";
-}
-
-function buildCard(id, index){
-  const container = document.createElement('div');
-  container.className = 'card';
-  container.id = `card-${id}`;
-
-  container.innerHTML = `
-    <div class="title"><span class="title-icon">${minerIcons[index]}</span>${id}</div>
-    <div class="muted">Status: <span id="status-${id}">--</span></div>
-    <div class="value" id="hash-${id}">--</div>
-    <div class="muted">Accepted / Total: <span id="shares-${id}">0 / 0</span></div>
-    <div class="pool-info" id="pool-${id}">--</div>
-    <canvas id="chart-${id}" class="chart"></canvas>
-  `;
-  document.getElementById('grid').appendChild(container);
-
-  // init chart
-  const ctx = document.getElementById(`chart-${id}`).getContext('2d');
-  charts[id] = new Chart(ctx, {
-    type: 'line',
-    data: { 
-      labels: [], 
-      datasets: [{ 
-        label: 'H/s', 
-        data: [], 
-        fill: true, 
-        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-        borderColor: 'rgba(102, 126, 234, 0.8)',
-        borderWidth: 2,
-        tension: 0.3,
-        pointRadius: 0
-      }] 
-    },
-    options: { 
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { 
-        x: { 
-          display: false 
-        }, 
-        y: { 
-          ticks: { 
-            callback: function(v){ 
-              return v>1e9 ? (v/1e9).toFixed(1)+'G' : 
-                     v>1e6 ? (v/1e6).toFixed(1)+'M' : 
-                     v>1e3 ? (v/1e3).toFixed(1)+'K' : v 
-            },
-            color: '#9fb3c8',
-            font: { size: 9 }
-          },
-          grid: {
-            color: 'rgba(255,255,255,0.05)'
-          }
-        } 
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: function(context) {
-              return humanHash(context.raw);
-            }
-          }
-        }
-      },
-      animation: {
-        duration: 0
-      }
-    }
-  });
-}
-
-function updateUI(data){
-  document.getElementById('ts').innerText = new Date().toLocaleTimeString();
-  
-  // Update overall stats
-  let totalHashrate = 0;
-  let activeRigs = 0;
-  
-  for(const id of Object.keys(data)){
-    const node = data[id];
-    if (node.status && node.status.online) {
-      totalHashrate += node.latest.hashrate_hs;
-      activeRigs++;
-    }
-  }
-  
-  document.querySelector('.stat-item:nth-child(1) .stat-value').innerText = humanHash(totalHashrate);
-  document.querySelector('.stat-item:nth-child(2) .stat-value').innerText = `${activeRigs}/${miners.length}`;
-  
-  for(const id of Object.keys(data)){
-    const node = data[id];
-    const latest = node.latest;
-    const stat = node.status && node.status.online ? 'ONLINE' : 'OFFLINE';
-    
-    if(!document.getElementById(`status-${id}`)) {
-      buildCard(id, miners.indexOf(id));
-    }
-    
-    document.getElementById(`status-${id}`).innerHTML = node.status && node.status.online ? 
-      `<span class="online">ONLINE</span>` : 
-      `<span class="offline">OFFLINE</span>`;
-    
-    const hashEl = document.getElementById(`hash-${id}`);
-    const sharesEl = document.getElementById(`shares-${id}`);
-    const poolEl = document.getElementById(`pool-${id}`);
-    
-    if(latest && node.status.online){
-      hashEl.innerText = humanHash(latest.hashrate_hs);
-      sharesEl.innerText = `${latest.accepted} / ${latest.accepted + latest.rejected}`;
-      poolEl.innerText = `Pool: ${node.pool}`;
-      
-      // Add trend indicator
-      const history = node.history || [];
-      if (history.length > 1) {
-        const current = latest.hashrate_hs;
-        const previous = history[history.length - 2].hashrate_hs;
-        const trend = current > previous ? 'up' : 'down';
-        const percentage = Math.abs((current - previous) / previous * 100).toFixed(1);
+    <div class="dashboard">
+        <header>
+            <h1>⛏ Lottery Miner Dashboard</h1>
+            <div class="header-info">
+                <div class="refresh-indicator">
+                    <div class="pulse"></div>
+                    Auto-refresh: 5s
+                </div>
+            </div>
+        </header>
         
-        hashEl.innerHTML = humanHash(latest.hashrate_hs) + 
-          `<span class="hashrate-trend ${trend}">${trend === 'up' ? '↗' : '↘'} ${percentage}%</span>`;
-      }
-    } else {
-      hashEl.innerText = "0 H/s";
-      sharesEl.innerText = "0 / 0";
-      poolEl.innerText = "Pool: --";
-    }
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value">26.4 MH/s</div>
+                <div class="stat-label">Total Hashrate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">2/2</div>
+                <div class="stat-label">Active Miners</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">68°C</div>
+                <div class="stat-label">GPU Temp</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0.00015 ETH</div>
+                <div class="stat-label">24h Revenue</div>
+            </div>
+        </div>
+        
+        <div class="miners-grid">
+            <div class="miner-card">
+                <div class="miner-header">
+                    <div class="miner-title">🎮 GPU - RTX 2050</div>
+                    <div class="status online">ONLINE</div>
+                </div>
+                
+                <div class="miner-stats">
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">19.2 MH/s<span class="trend up">↗ 2.1%</span></div>
+                        <div class="miner-stat-label">Hashrate</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">68<span class="temp-indicator warm">°C</span></div>
+                        <div class="miner-stat-label">Temperature</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">124 / 126</div>
+                        <div class="miner-stat-label">Accepted / Total</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">eth.2miners.com</div>
+                        <div class="miner-stat-label">Pool</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="gpuChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="miner-card">
+                <div class="miner-header">
+                    <div class="miner-title">⚙️ CPU - i5-12450H</div>
+                    <div class="status online">ONLINE</div>
+                </div>
+                
+                <div class="miner-stats">
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">7.2 MH/s<span class="trend down">↘ 1.4%</span></div>
+                        <div class="miner-stat-label">Hashrate</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">62<span class="temp-indicator cool">°C</span></div>
+                        <div class="miner-stat-label">Temperature</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">42 / 43</div>
+                        <div class="miner-stat-label">Accepted / Total</div>
+                    </div>
+                    <div class="miner-stat">
+                        <div class="miner-stat-value">eth.2miners.com</div>
+                        <div class="miner-stat-label">Pool</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="cpuChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            Last update: <span id="timestamp">--:--:--</span> · System: RTX 2050 + i5-12450H
+        </footer>
+    </div>
 
-    // update chart
-    const hist = node.history || [];
-    const labels = hist.map(s => new Date(s.ts*1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
-    const series = hist.map(s => s.hashrate_hs || 0);
-    const ch = charts[id];
-    if(ch){
-      ch.data.labels = labels;
-      ch.data.datasets[0].data = series;
-      ch.update('none');
-    }
-  }
-}
-
-function poll(){
-  // Update miner data with small random variations
-  minerData = updateMinerData(minerData);
-  
-  // Update UI with new data
-  updateUI(minerData);
-  
-  // Schedule next update
-  setTimeout(poll, 5000); // 5 seconds
-}
-
-// bootstrap UI cards
-miners.forEach((miner, index) => { 
-  if(miner) buildCard(miner, index); 
-});
-
-// Initialize UI with current data
-updateUI(minerData);
-
-// Start polling
-poll();
-</script>
+    <script>
+        // Initialize charts
+        const gpuCtx = document.getElementById('gpuChart').getContext('2d');
+        const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        
+        // Generate initial data points
+        function generateInitialData(baseValue, count) {
+            const data = [];
+            for (let i = 0; i < count; i++) {
+                data.push(baseValue * (0.9 + Math.random() * 0.2));
+            }
+            return data;
+        }
+        
+        // GPU Chart
+        const gpuChart = new Chart(gpuCtx, {
+            type: 'line',
+            data: {
+                labels: Array(10).fill(''),
+                datasets: [{
+                    label: 'Hashrate',
+                    data: generateInitialData(19.2, 10),
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    y: {
+                        display: false,
+                        min: 17,
+                        max: 21
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                }
+            }
+        });
+        
+        // CPU Chart
+        const cpuChart = new Chart(cpuCtx, {
+            type: 'line',
+            data: {
+                labels: Array(10).fill(''),
+                datasets: [{
+                    label: 'Hashrate',
+                    data: generateInitialData(7.2, 10),
+                    borderColor: '#38b2ac',
+                    backgroundColor: 'rgba(56, 178, 172, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    y: {
+                        display: false,
+                        min: 6,
+                        max: 8
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                }
+            }
+        });
+        
+        // Update timestamp
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // Simulate data updates
+        function updateData() {
+            // Update GPU data
+            const gpuData = gpuChart.data.datasets[0].data;
+            gpuData.shift();
+            gpuData.push(19.2 * (0.9 + Math.random() * 0.2));
+            gpuChart.update('none');
+            
+            // Update CPU data
+            const cpuData = cpuChart.data.datasets[0].data;
+            cpuData.shift();
+            cpuData.push(7.2 * (0.9 + Math.random() * 0.2));
+            cpuChart.update('none');
+            
+            // Update hashrate values with small random variations
+            const gpuHashrateElement = document.querySelector('.miner-card:nth-child(1) .miner-stat-value');
+            const cpuHashrateElement = document.querySelector('.miner-card:nth-child(2) .miner-stat-value');
+            
+            const gpuHashrate = (19.2 * (0.95 + Math.random() * 0.1)).toFixed(1);
+            const cpuHashrate = (7.2 * (0.95 + Math.random() * 0.1)).toFixed(1);
+            
+            gpuHashrateElement.innerHTML = `${gpuHashrate} MH/s<span class="trend ${Math.random() > 0.5 ? 'up' : 'down'}">${Math.random() > 0.5 ? '↗' : '↘'} ${(Math.random() * 3).toFixed(1)}%</span>`;
+            cpuHashrateElement.innerHTML = `${cpuHashrate} MH/s<span class="trend ${Math.random() > 0.5 ? 'up' : 'down'}">${Math.random() > 0.5 ? '↗' : '↘'} ${(Math.random() * 3).toFixed(1)}%</span>`;
+            
+            // Update total hashrate
+            document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = 
+                (parseFloat(gpuHashrate) + parseFloat(cpuHashrate)).toFixed(1) + ' MH/s';
+            
+            // Update temperature with small variations
+            const gpuTemp = Math.floor(65 + Math.random() * 8);
+            const cpuTemp = Math.floor(58 + Math.random() * 10);
+            
+            document.querySelector('.miner-card:nth-child(1) .miner-stat:nth-child(2) .miner-stat-value').innerHTML = 
+                `${gpuTemp}<span class="temp-indicator ${gpuTemp < 70 ? 'warm' : 'hot'}">°C</span>`;
+                
+            document.querySelector('.miner-card:nth-child(2) .miner-stat:nth-child(2) .miner-stat-value').innerHTML = 
+                `${cpuTemp}<span class="temp-indicator ${cpuTemp < 65 ? 'cool' : 'warm'}">°C</span>`;
+            
+            document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = `${gpuTemp}°C`;
+            
+            // Update shares occasionally
+            if (Math.random() > 0.7) {
+                const gpuShares = document.querySelector('.miner-card:nth-child(1) .miner-stat:nth-child(3) .miner-stat-value');
+                const parts = gpuShares.textContent.split(' / ');
+                parts[0] = (parseInt(parts[0]) + 1).toString();
+                parts[1] = (parseInt(parts[1]) + (Math.random() > 0.9 ? 1 : 0)).toString();
+                gpuShares.textContent = parts.join(' / ');
+            }
+            
+            if (Math.random() > 0.8) {
+                const cpuShares = document.querySelector('.miner-card:nth-child(2) .miner-stat:nth-child(3) .miner-stat-value');
+                const parts = cpuShares.textContent.split(' / ');
+                parts[0] = (parseInt(parts[0]) + 1).toString();
+                parts[1] = (parseInt(parts[1]) + (Math.random() > 0.9 ? 1 : 0)).toString();
+                cpuShares.textContent = parts.join(' / ');
+            }
+            
+            updateTimestamp();
+        }
+        
+        // Initialize
+        updateTimestamp();
+        updateData();
+        
+        // Update data every 5 seconds
+        setInterval(updateData, 5000);
+    </script>
 </body>
 </html>
