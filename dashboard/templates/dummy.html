@@ -150,6 +150,98 @@
             margin-top: 8px;
         }
         
+        .lottery-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+        
+        .lottery-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .lottery-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .lottery-result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            min-height: 120px;
+        }
+        
+        .lottery-indicator {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .hit {
+            color: #57f287;
+            text-shadow: 0 0 10px rgba(87, 242, 135, 0.5);
+            animation: pulse-hit 2s infinite;
+        }
+        
+        .no-hit {
+            color: #9fb3c8;
+        }
+        
+        .lottery-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .lottery-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .lottery-stat-label {
+            font-size: 12px;
+            color: #9fb3c8;
+        }
+        
+        .lottery-stat-value {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .probability-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffa726);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
         footer {
             margin-top: auto;
             text-align: center;
@@ -178,6 +270,12 @@
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
+        }
+        
+        @keyframes pulse-hit {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         .temp-indicator {
@@ -226,6 +324,37 @@
             <div class="stat-card">
                 <div class="stat-value">0.00015 ETH</div>
                 <div class="stat-label">24h Revenue</div>
+            </div>
+        </div>
+        
+        <div class="lottery-section">
+            <div class="lottery-title">🎰 Block Lottery</div>
+            <div class="lottery-content">
+                <div class="lottery-result">
+                    <div class="lottery-indicator no-hit" id="lottery-indicator">NO HIT</div>
+                    <div class="muted" id="lottery-message">Mining for blocks...</div>
+                </div>
+                <div class="lottery-stats">
+                    <div class="lottery-stat">
+                        <div class="lottery-stat-label">Probability</div>
+                        <div class="lottery-stat-value" id="probability-value">0.000012%</div>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="probability-fill"></div>
+                    </div>
+                    <div class="lottery-stat">
+                        <div class="lottery-stat-label">Blocks Found</div>
+                        <div class="lottery-stat-value" id="blocks-found">0</div>
+                    </div>
+                    <div class="lottery-stat">
+                        <div class="lottery-stat-label">Last Block</div>
+                        <div class="lottery-stat-value" id="last-block">Never</div>
+                    </div>
+                    <div class="lottery-stat">
+                        <div class="lottery-stat-label">Estimated Time</div>
+                        <div class="lottery-stat-value" id="estimated-time">~2.5 years</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -300,6 +429,12 @@
         // Initialize charts
         const gpuCtx = document.getElementById('gpuChart').getContext('2d');
         const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        
+        // Lottery state
+        let blocksFound = 0;
+        let lastBlockTime = null;
+        let isHitActive = false;
+        let hitTimeout = null;
         
         // Generate initial data points
         function generateInitialData(baseValue, count) {
@@ -395,6 +530,43 @@
             document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
         }
         
+        // Check for block hit (extremely low probability)
+        function checkBlockHit() {
+            // For a single RTX 2050 with ~20 MH/s, probability of finding a block is extremely low
+            // Let's simulate a 0.0001% chance every check (which is still much higher than reality)
+            const hit = Math.random() < 0.000001;
+            
+            if (hit && !isHitActive) {
+                // Block found!
+                blocksFound++;
+                lastBlockTime = new Date();
+                isHitActive = true;
+                
+                // Update UI
+                document.getElementById('lottery-indicator').textContent = 'HIT!';
+                document.getElementById('lottery-indicator').className = 'lottery-indicator hit';
+                document.getElementById('lottery-message').textContent = 'Block found! 🎉';
+                document.getElementById('blocks-found').textContent = blocksFound;
+                document.getElementById('last-block').textContent = lastBlockTime.toLocaleTimeString();
+                
+                // Reset after 5 seconds
+                hitTimeout = setTimeout(() => {
+                    document.getElementById('lottery-indicator').textContent = 'NO HIT';
+                    document.getElementById('lottery-indicator').className = 'lottery-indicator no-hit';
+                    document.getElementById('lottery-message').textContent = 'Mining for blocks...';
+                    isHitActive = false;
+                }, 5000);
+            }
+        }
+        
+        // Update probability visualization
+        function updateProbability() {
+            // For visualization purposes, we'll show a very small probability
+            const probability = 0.000012; // 0.000012%
+            document.getElementById('probability-value').textContent = probability.toFixed(6) + '%';
+            document.getElementById('probability-fill').style.width = (probability * 100) + '%'; // Scale for visibility
+        }
+        
         // Simulate data updates
         function updateData() {
             // Update GPU data
@@ -452,11 +624,15 @@
                 cpuShares.textContent = parts.join(' / ');
             }
             
+            // Check for block hit
+            checkBlockHit();
+            
             updateTimestamp();
         }
         
         // Initialize
         updateTimestamp();
+        updateProbability();
         updateData();
         
         // Update data every 5 seconds
